@@ -23,7 +23,7 @@ it('Single Property', () => {
 	});
 });
 
-it.only('Multiple Properties', () => {
+it('Multiple Properties', () => {
 	cy.mount(<App />);
 
 	cy.document().then((doc) => {
