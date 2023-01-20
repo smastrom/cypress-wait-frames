@@ -18,7 +18,6 @@
 		"sourceType": "module"
 	},
 	"rules": {
-		"indent": ["error", "tab"],
 		"curly": ["error", "all"],
 		"no-useless-return": "error",
 		"no-else-return": "error",
