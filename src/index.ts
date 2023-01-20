@@ -16,31 +16,40 @@ export type WaitCmdOpts<T> = {
 };
 
 export type WaitCmdReturn<T> = {
-	subject: T extends Cypress.AUTWindow ? T : T extends Document ? T : JQuery<HTMLElement>;
+	subject: T extends Cypress.AUTWindow
+		? T
+		: T extends Document
+		? T
+		: T extends HTMLElement
+		? T
+		: JQuery<HTMLElement>;
 	property: string;
 	value: string | number | undefined;
 	timestamp: DOMHighResTimeStamp;
 	attempts: number;
 };
 
-export type GetPropOptions = {
+export type GetValueOptions = {
 	isWin: boolean;
 	cyWin: Cypress.AUTWindow;
-	target: Cypress.AUTWindow | HTMLElement | JQuery<HTMLElement>;
+	target: Cypress.AUTWindow | HTMLElement;
 	prop: string;
 };
 
-export type WaitFramesOptions = GetPropOptions & {
+export type WaitFramesOptions = GetValueOptions & {
 	frames: number;
 	isDoc: boolean;
 };
 
 const ERR = '[cypress-wait-frames] - ';
 
-Cypress.Commands.add('waitFrames', waitFrames);
+function isPlainObject(obj: unknown) {
+	return !Array.isArray(obj) && typeof obj === 'object' && obj !== null;
+}
 
-const isPlainObject = (obj: unknown) =>
-	!Array.isArray(obj) && typeof obj === 'object' && obj !== null;
+function isPrimitive(value: unknown) {
+	return value !== Object(value);
+}
 
 function waitFrames<T>({
 	subject: getSubject,
@@ -48,21 +57,25 @@ function waitFrames<T>({
 	frames = 5,
 	timeout = 30 * 1000,
 }: WaitCmdOpts<T>) {
-	getSubject().then((_subject) => {
+	getSubject().then((subject) => {
 		cy.window().then({ timeout }, async (cyWin) => {
-			const isWin = 'Cypress' in (_subject as Cypress.AUTWindow);
-			const isDoc = 'documentElement' in (_subject as Document);
-			const isEl = !isDoc && 'tagName' in (_subject as JQuery<HTMLElement>);
-			const isUnwrappedEl = isPlainObject(_subject) && '0' in (_subject as object);
+			const isWin = 'Cypress' in (subject as Cypress.AUTWindow);
+			const isDoc = 'documentElement' in (subject as Document);
+			const isEl = !isDoc && 'tagName' in (subject as HTMLElement);
+			const isUnwrappedEl =
+				!isEl &&
+				isPlainObject(subject) &&
+				(subject as JQuery<HTMLElement>).length === 1 &&
+				'tagName' in (subject as JQuery<HTMLElement>)['0'];
 
 			if (!isWin && !isDoc && !isEl && !isUnwrappedEl) {
 				throw new Error(
-					`${ERR} Invalid target. It must be a function returning 'cy.window', 'cy.document' or 'cy.get'.`
+					`${ERR} Invalid subject. It must be 'cy.window', 'cy.document' or '() => cy.get()'.`
 				);
 			}
 
 			if (!Array.isArray(property) && typeof property !== 'string') {
-				throw new Error(`${ERR} Invalid properties. It must be an array of string or a string.`);
+				throw new Error(`${ERR} Invalid properties. It must be a string or an array of strings.`);
 			}
 
 			if (typeof property === 'string') {
@@ -80,8 +93,8 @@ function waitFrames<T>({
 							: isDoc
 							? cyWin.document.documentElement
 							: isEl
-							? (_subject as JQuery<HTMLElement>)
-							: (_subject['0'] as JQuery<HTMLElement>),
+							? (subject as HTMLElement)
+							: (subject as JQuery<HTMLElement>)['0'],
 						prop,
 						frames,
 					})
@@ -95,38 +108,36 @@ function waitFrames<T>({
 	});
 }
 
-function getValue({ isWin, cyWin, target, prop }: GetPropOptions): string | number | undefined {
-	if (prop in target) {
-		return (target as Record<string, any>)[prop];
+function getValue({ isWin, cyWin, target, prop }: GetValueOptions) {
+	if (prop.includes('.')) {
+		const [method, _prop] = prop.split('.');
+		const rectValue = (
+			(target as HTMLElement)[method as keyof HTMLElement] as CallableFunction
+		)?.()?.[_prop];
+		if (rectValue === undefined || rectValue === null) {
+			throw new Error(`${ERR} Invalid or unsupported method: ${prop}`);
+		}
+		return rectValue;
 	}
+
+	if (prop in target && isPrimitive((target as HTMLElement)[prop as keyof HTMLElement])) {
+		return (target as HTMLElement)[prop as keyof HTMLElement];
+	} // Improve this
 
 	if (isWin) {
 		throw new Error(`${ERR} Invalid window property: ${prop}`);
 	}
 
-	if (prop.includes('.')) {
-		const [method, _prop] = prop.split('.');
-		const value = (target as Record<string, any>)[method]?.()?.[_prop];
-		if (typeof value === 'undefined' || value === null) {
-			throw new Error(`${ERR} Invalid DOM property / method: ${prop}`);
-		}
-		return value;
-	}
-
-	const computedStyle = cyWin
-		.getComputedStyle(target as unknown as HTMLElement)
-		.getPropertyValue(prop);
-
-	if (computedStyle === '') {
+	if (!(prop in cyWin.getComputedStyle(target as HTMLElement))) {
 		throw new Error(`${ERR} Invalid DOM/CSS property: ${prop}`);
 	}
 
-	return computedStyle;
+	return cyWin.getComputedStyle(target as HTMLElement).getPropertyValue(prop);
 }
 
 function _waitFrames<T>({ isWin, isDoc, cyWin, target, prop, frames }: WaitFramesOptions) {
 	return new Cypress.Promise<WaitCmdReturn<T>>((resolve, reject) => {
-		let rafId: DOMHighResTimeStamp | undefined = 0;
+		let rafId: DOMHighResTimeStamp = 0;
 		let prevValue: number | string | undefined | null = null;
 		let frameCount = 0;
 		let attempts = 0;
@@ -172,3 +183,5 @@ function _waitFrames<T>({ isWin, isDoc, cyWin, target, prop, frames }: WaitFrame
 		rafId = cyWin.requestAnimationFrame(getNextValue);
 	});
 }
+
+Cypress.Commands.add('waitFrames', waitFrames);
