@@ -9,7 +9,8 @@
 		"eslint:recommended",
 		"plugin:react/recommended",
 		"plugin:@typescript-eslint/recommended",
-		"plugin:cypress/recommended"
+		"plugin:cypress/recommended",
+		"plugin:react/jsx-runtime"
 	],
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {
