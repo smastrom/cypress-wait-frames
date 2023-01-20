@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-
 import '../../src/index';
 
 declare global {
