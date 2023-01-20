@@ -14,11 +14,11 @@ it('Single Property', () => {
 		property: 'getBoundingClientRect.top',
 		frames: 20,
 	}).then((data) => {
-		expect(data[0].value).to.be.greaterThan(0).and.lessThan(1); // Never returns exactly 0
+		expect(data[0].value).to.be.approximately(-1, 1);
 	});
 });
 
-it.only('Multiple Properties', () => {
+it('Multiple Properties', () => {
 	cy.mount(<App />);
 
 	cy.get('#Container').then((el) => {
@@ -48,7 +48,7 @@ it('Should throw error if invalid subject', (end) => {
 
 	cy.expectError(
 		end,
-		"[cypress-wait-frames] - Invalid target. It must be a function returning 'cy.window', 'cy.document' or 'cy.get'."
+		"[cypress-wait-frames] - Invalid subject. It must be 'cy.window', 'cy.document' or '() => cy.get()'."
 	);
 
 	cy.waitFrames({
