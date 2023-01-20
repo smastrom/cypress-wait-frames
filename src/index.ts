@@ -39,6 +39,9 @@ const ERR = '[cypress-wait-frames] - ';
 
 Cypress.Commands.add('waitFrames', waitFrames);
 
+const isPlainObject = (obj: unknown) =>
+	!Array.isArray(obj) && typeof obj === 'object' && obj !== null;
+
 function waitFrames<T>({
 	subject: getSubject,
 	property,
@@ -46,12 +49,13 @@ function waitFrames<T>({
 	timeout = 30 * 1000,
 }: WaitCmdOpts<T>) {
 	getSubject().then((_subject) => {
-		cy.window().then({ timeout }, (cyWin) => {
+		cy.window().then({ timeout }, async (cyWin) => {
 			const isWin = 'Cypress' in (_subject as Cypress.AUTWindow);
 			const isDoc = 'documentElement' in (_subject as Document);
 			const isEl = !isDoc && 'tagName' in (_subject as JQuery<HTMLElement>);
+			const isUnwrappedEl = isPlainObject(_subject) && '0' in (_subject as object);
 
-			if (!isWin && !isDoc && !isEl) {
+			if (!isWin && !isDoc && !isEl && !isUnwrappedEl) {
 				throw new Error(
 					`${ERR} Invalid target. It must be a function returning 'cy.window', 'cy.document' or 'cy.get'.`
 				);
@@ -75,7 +79,9 @@ function waitFrames<T>({
 							? cyWin
 							: isDoc
 							? cyWin.document.documentElement
-							: (_subject as JQuery<HTMLElement>),
+							: isEl
+							? (_subject as JQuery<HTMLElement>)
+							: (_subject['0'] as JQuery<HTMLElement>),
 						prop,
 						frames,
 					})
@@ -89,7 +95,7 @@ function waitFrames<T>({
 	});
 }
 
-function getProp({ isWin, cyWin, target, prop }: GetPropOptions): string | number | undefined {
+function getValue({ isWin, cyWin, target, prop }: GetPropOptions): string | number | undefined {
 	if (prop in target) {
 		return (target as Record<string, any>)[prop];
 	}
@@ -125,9 +131,9 @@ function _waitFrames<T>({ isWin, isDoc, cyWin, target, prop, frames }: WaitFrame
 		let frameCount = 0;
 		let attempts = 0;
 
-		function scrollEnd() {
+		function getNextValue() {
 			try {
-				const nextValue = getProp({ isWin, cyWin, target, prop });
+				const nextValue = getValue({ isWin, cyWin, target, prop });
 
 				if (prevValue === null || prevValue !== nextValue) {
 					if (frameCount > 0) {
@@ -137,7 +143,7 @@ function _waitFrames<T>({ isWin, isDoc, cyWin, target, prop, frames }: WaitFrame
 					frameCount = 0;
 					prevValue = nextValue;
 
-					return cyWin.requestAnimationFrame(scrollEnd);
+					return cyWin.requestAnimationFrame(getNextValue);
 				}
 
 				frameCount++;
@@ -156,13 +162,13 @@ function _waitFrames<T>({ isWin, isDoc, cyWin, target, prop, frames }: WaitFrame
 						attempts,
 					});
 				} else {
-					cyWin.requestAnimationFrame(scrollEnd);
+					cyWin.requestAnimationFrame(getNextValue);
 				}
 			} catch (error) {
 				reject(error);
 			}
 		}
 
-		rafId = cyWin.requestAnimationFrame(scrollEnd);
+		rafId = cyWin.requestAnimationFrame(getNextValue);
 	});
 }
