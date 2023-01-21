@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import type { WaitCmdOpts, WaitCmdReturn, GetValueOptions, RafOptions } from './types';
+import type { WaitCmdOpts, WaitCmdReturn, GetValueOptions, RafOptions, Primitive } from './types';
 
 const ERR = '[cypress-wait-frames] - ';
 
@@ -68,10 +68,10 @@ function isPlainObject(obj: unknown) {
 }
 
 function isPrimitive(value: unknown) {
-	return value !== Object(value);
+	return value === null || (typeof value !== 'object' && typeof value !== 'function');
 }
 
-function getValue<T>({ isWin, cyWin, target, prop }: GetValueOptions<T>) {
+function getValue<T>({ isWin, cyWin, target, prop }: GetValueOptions<T>): Primitive {
 	if ((prop as string).includes('.')) {
 		const [method, _prop] = (prop as string).split('.');
 		const rectValue = (
@@ -85,7 +85,7 @@ function getValue<T>({ isWin, cyWin, target, prop }: GetValueOptions<T>) {
 	}
 
 	if (prop in target && isPrimitive(target[prop as keyof typeof target])) {
-		return target[prop as keyof typeof target];
+		return target[prop as keyof typeof target] as Primitive;
 	}
 
 	if (isWin) {
