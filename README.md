@@ -1,6 +1,6 @@
-# Cypress waitFrames
+# Cypress Wait Frames
 
-Cypress command to correctly wait for any CSS/DOM property to be idle.
+Cypress command to correctly wait for any CSS/DOM property to be idle after a specified number of frames.
 
 <br />
 
@@ -18,23 +18,19 @@ import 'cypress-wait-frames'
 
 <br />
 
-If using TypeScript, install the latest version of [csstype](https://www.npmjs.com/package/csstype) to get autocomplete for CSS properties:
+If using TypeScript, install the latest version of [csstype](https://www.npmjs.com/package/csstype) for CSS properties autocompletion:
 
 ```bash
 pnpm add -D csstype
 ```
 
-### Examples
-
-Check the [tests](https://github.com/smastrom/cypress-wait-frames/tree/main/tests) folder.
-
 <br />
 
 ## Usage
 
-Instead of guessing timings with `cy.wait` which might fail your tests on different envs/browsers, you can use this command to correctly wait for any DOM/CSS properties to be idle.
+Instead of guessing timings using `cy.wait` which might bring your tests to fail on different environments, you can use this command to wait for any DOM/CSS properties to be idle and safely run your further assertions.
 
-Specify a `subject` to watch, one or more DOM/CSS `property` and a number of `frames`. Command will resolve once queried properties aren't changed for the specified number of frames.
+Specify a `subject` to watch, one or more `property` and a number of `frames`. Command will resolve once queried properties haven't changed for that number of frames.
 
 ```js
 cy.scrollTo(0, 1200)
@@ -42,7 +38,7 @@ cy.scrollTo(0, 1200)
 cy.waitFrames({
   subject: cy.window,
   property: 'scrollY',
-  frames: 10
+  frames: 25
 }).then((data) => {
   // Assert the expected scroll position or do something once scroll is idle
 })
@@ -53,24 +49,24 @@ cy.waitFrames({
 | Property   | Default    | Type                | Description                        | Required |
 | ---------- | ---------- | ------------------- | ---------------------------------- | -------- |
 | `subject`  | undefined  | () => Chainable\<T> | Chainable to watch for properties. | Yes      |
-| `property` | undefined  | string \| string[]  | One or more property to watch.     | Yes      |
+| `property` | undefined  | string \| string[]  | One or more properties to watch.   | Yes      |
 | `frames`   | 20         | number              | Number of frames to wait.          | No       |
 | `timeout`  | 30 \* 1000 | number              | Timeout in milliseconds.           | No       |
 
 ### Returns
 
-The command returns a Cypress promise which resolves with the following array of objects (one for each property) or throws an error if `timeout` is reached:
+The command returns a Cypress promise which resolves to an array of objects (one for each property) or throws an error if `timeout` is reached:
 
 | Property   | Type                                                                | Description                                     |
 | ---------- | ------------------------------------------------------------------- | ----------------------------------------------- |
-| `value`    | `string \| number`                                                  | Value at which the function resolved.           |
 | `subject`  | `AUTWindow` \| `Document` \| `HTMLElement` \| `JQuery<HTMLElement>` | Subject yielded from `subject` option.          |
+| `value`    | `string \| number`                                                  | Property value at which the function resolved.  |
 | `property` | `string`                                                            | Awaited property name.                          |
 | `time`     | `DOMHighResTimestamp`                                               | Time in ms that took to resolve since invoking. |
 
 ### How many frames to wait?
 
-It really depends on your use case. For smooth scrolling 15-20 frames are enough. For a simple CSS transition even 5-10 frames might be ok.
+It really depends on the property and the interaction. For smooth scrolling 15-20 frames shoud be enough. For a simple CSS transition even 5 frames might be ok.
 
 <br />
 
@@ -130,7 +126,7 @@ cy.waitFrames({
 })
 ```
 
-:bulb: Do not use _camelCase_ for CSS properties. Use _kebab-case_ instead. `getComputedStyle` is used internally to get the values so feel free to query any CSS property even if not direcly added via classes or styles.
+:bulb: Use _kebab-case_ for CSS properties. `getComputedStyle` is used internally to get the values so feel free to query any CSS property even if not direcly added via classes or styles.
 
 :bulb: If using TypeScript, it will warn you if you type a wrong property name (e.g. _scrollY_ on an HTMLElement, _background-color_ on Window or _flexWrap_ instead of _flex-wrap_).
 
@@ -161,6 +157,12 @@ cy.waitFrames({
 ```
 
 :bulb: `waitFrames` will resolve once all properties are idle.
+
+<br />
+
+## Examples
+
+Check the [tests](https://github.com/smastrom/cypress-wait-frames/tree/main/tests) folder.
 
 <br />
 

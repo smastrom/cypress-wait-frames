@@ -41,7 +41,7 @@ export type WaitCmdReturn<T> = {
 	property: Properties<T>;
 	/** Value at which the function resolved. */
 	value: string | number | undefined;
-	/** Timestamp at which the function resolved. */
+	/** Time in ms that took to resolve since invoking. */
 	time: DOMHighResTimeStamp;
 };
 

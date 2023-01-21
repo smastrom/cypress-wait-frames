@@ -4,7 +4,7 @@ import type { WaitCmdOpts, WaitCmdReturn, GetValueOptions, RafOptions } from './
 
 const ERR = '[cypress-wait-frames] - ';
 
-export function waitFrames<T>({
+function waitFrames<T>({
 	subject: getSubject,
 	property,
 	frames = 20,
@@ -101,7 +101,7 @@ function getValue<T>({ isWin, cyWin, target, prop }: GetValueOptions<T>) {
 
 function _waitFrames<T>({ isWin, isDoc, cyWin, target, prop, frames }: RafOptions<T>) {
 	return new Cypress.Promise<WaitCmdReturn<T>>((resolve, reject) => {
-		const start = performance.now();
+		const start = cyWin.performance.now();
 
 		let rafId: DOMHighResTimeStamp = 0;
 		let prevValue: number | string | undefined | null = getValue<T>({
@@ -135,7 +135,7 @@ function _waitFrames<T>({ isWin, isDoc, cyWin, target, prop, frames }: RafOption
 							: target) as WaitCmdReturn<T>['subject'],
 						property: prop,
 						value: nextValue,
-						time: performance.now() - start,
+						time: cyWin.performance.now() - start,
 					});
 				} else {
 					cyWin.requestAnimationFrame(getNextValue);

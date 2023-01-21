@@ -1,6 +1,6 @@
 import { App } from './App';
 
-it('Should match getBoundingClientRect top property', () => {
+it.only('Should match getBoundingClientRect top property', () => {
 	cy.mount(<App />);
 
 	cy.get('h1')
@@ -39,8 +39,6 @@ describe('Should match multiple properties on color transition and scroll to bot
 			property: ['getBoundingClientRect.top', 'background-color'],
 		}).then((data) => {
 			expect(data.length).to.equal(2);
-
-			console.log(data);
 
 			const { scrollTop } = document.documentElement;
 			expect(data[0].value).to.approximately(-scrollTop, 2);
