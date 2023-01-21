@@ -1,6 +1,6 @@
 import { App } from './App';
 
-it('Single Property', () => {
+it('Should match scrollTop on scroll to bottom and to top complete', () => {
 	cy.mount(<App />);
 	cy.scrollTo('bottom');
 
@@ -21,7 +21,7 @@ it('Single Property', () => {
 	});
 });
 
-it('Multiple Properties', () => {
+it('Should match multiple properties on color transition and scroll to bottom complete', () => {
 	cy.mount(<App />);
 
 	cy.document().then((doc) => {
