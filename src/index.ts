@@ -11,7 +11,7 @@ export function waitFrames<T>({
 	timeout = 30 * 1000,
 }: WaitCmdOpts<T>) {
 	getSubject().then((subject) => {
-		cy.window().then({ timeout }, async (cyWin) => {
+		cy.window().then({ timeout }, (cyWin) => {
 			const isWin = 'Cypress' in (subject as Cypress.AUTWindow);
 			const isDoc = 'documentElement' in (subject as Document);
 			const isEl = !isDoc && 'tagName' in (subject as HTMLElement);
@@ -101,6 +101,8 @@ function getValue<T>({ isWin, cyWin, target, prop }: GetValueOptions<T>) {
 
 function _waitFrames<T>({ isWin, isDoc, cyWin, target, prop, frames }: RafOptions<T>) {
 	return new Cypress.Promise<WaitCmdReturn<T>>((resolve, reject) => {
+		const start = performance.now();
+
 		let rafId: DOMHighResTimeStamp = 0;
 		let prevValue: number | string | undefined | null = getValue<T>({
 			isWin,
@@ -133,7 +135,7 @@ function _waitFrames<T>({ isWin, isDoc, cyWin, target, prop, frames }: RafOption
 							: target) as WaitCmdReturn<T>['subject'],
 						property: prop,
 						value: nextValue,
-						timestamp: performance.now(),
+						time: performance.now() - start,
 					});
 				} else {
 					cyWin.requestAnimationFrame(getNextValue);

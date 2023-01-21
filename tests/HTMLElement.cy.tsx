@@ -17,26 +17,35 @@ it('Single Property', () => {
 	});
 });
 
-it.only('Multiple Properties', () => {
-	cy.mount(<App />);
-
-	cy.get('#Container').then((el) => {
-		expect(el[0].style.backgroundColor).to.equal('rgb(255, 255, 255)');
-		expect(el[0].getBoundingClientRect().top).to.equal(0);
+describe('Multiple properties', () => {
+	// Fixes HMR on line 30
+	afterEach(() => {
+		cy.scrollTo('top');
 	});
 
-	cy.get('button').click();
-	cy.scrollTo('bottom');
+	it('Test', () => {
+		cy.mount(<App />);
 
-	cy.waitFrames({
-		subject: () => cy.get('#Container'),
-		property: ['getBoundingClientRect.top', 'background-color'],
-	}).then((data) => {
-		expect(data.length).to.equal(2);
+		cy.get('#Container').then((el) => {
+			expect(el[0].style.backgroundColor).to.equal('rgb(255, 255, 255)');
+			expect(el[0].getBoundingClientRect().top).to.equal(0);
+		});
 
-		const { scrollTop } = document.documentElement;
-		expect(data[0].value).to.approximately(-scrollTop, 2);
-		expect(data[1].value).to.equal('rgb(255, 0, 0)');
+		cy.get('button').click();
+		cy.scrollTo('bottom');
+
+		cy.waitFrames({
+			subject: () => cy.get('#Container'),
+			property: ['getBoundingClientRect.top', 'background-color'],
+		}).then((data) => {
+			expect(data.length).to.equal(2);
+
+			console.log(data);
+
+			const { scrollTop } = document.documentElement;
+			expect(data[0].value).to.approximately(-scrollTop, 2);
+			expect(data[1].value).to.equal('rgb(255, 0, 0)');
+		});
 	});
 });
 
