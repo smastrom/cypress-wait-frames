@@ -18,22 +18,10 @@ import 'cypress-wait-frames'
 
 <br />
 
-If using TypeScript:
-
-1. Install the latest version of [csstype](https://www.npmjs.com/package/csstype) to get autocomplete for CSS properties:
+If using TypeScript, install the latest version of [csstype](https://www.npmjs.com/package/csstype) to get autocomplete for CSS properties:
 
 ```bash
 pnpm add -D csstype
-```
-
-2. Add `cypress-wait-frames` types to your `tsconfig.json`:
-
-```json
-{
-  "compilerOptions": {
-    "types": ["cypress", "cypress-wait-frames"]
-  }
-}
 ```
 
 <br />

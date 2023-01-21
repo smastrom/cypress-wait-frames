@@ -1,8 +1,19 @@
 {
 	"name": "cypress-wait-frames",
-	"version": "0.0.0",
-	"private": true,
-	"type": "module",
+	"version": "0.9.0",
+	"private": false,
+	"description": "Cypress command to correctly wait for any CSS/DOM properties to be idle after n frames.",
+	"keywords": [
+		"cypress",
+		"cypress-wait-frames",
+		"cypress-wait",
+		"cypress-raf",
+		"cypress-idle",
+		"cypress-frames",
+		"cypress-promise",
+		"cypress-scroll",
+		"cypress-css"
+	],
 	"scripts": {
 		"build": "rimraf dist && tsc && vite build",
 		"postbuild": "tsc src/types.ts --declaration --emitDeclarationOnly && cpy src/types.d.ts --flat dist --rename index.d.ts && rimraf src/types.d.ts",
@@ -10,8 +21,27 @@
 		"prepare": "husky install",
 		"test": "cypress run --component"
 	},
+	"homepage": "https://github.com/smastrom/cypress-wait-frames/",
+	"bugs": {
+		"url": "https://github.com/smastrom/cypress-wait-frames/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/smastrom/cypress-wait-frames.git"
+	},
+	"license": "MIT",
+	"author": {
+		"name": "Simone Mastromattei",
+		"email": "smastrom@proton.me"
+	},
+	"main": "dist/index.js",
+	"module": "dist/index.mjs",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist/*"
+	],
 	"lint-staged": {
-		"*.{ts,tsx}": "eslint --cache --fix",
+		"*.{ts,tsx}": "eslint --fix",
 		"*.{ts,tsx,md}": "prettier --write"
 	},
 	"devDependencies": {
