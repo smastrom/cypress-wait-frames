@@ -1,3 +1,6 @@
+![npm](https://img.shields.io/npm/v/cypress-wait-frames?color=46c119) ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/smastrom/cypress-wait-frames/tests.yml?branch=main&label=tests) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/cypress-wait-frames?color=success)
+![dependency-count](https://img.shields.io/badge/dependency%20count-0-success)
+
 # Cypress Wait Frames
 
 Cypress command to correctly wait for any CSS/DOM property to be idle after a specified number of frames.
@@ -46,20 +49,20 @@ cy.waitFrames({
 
 ### Options
 
-| Property   | Default    | Type                | Description                        | Required |
-| ---------- | ---------- | ------------------- | ---------------------------------- | -------- |
-| `subject`  | undefined  | () => Chainable\<T> | Chainable to watch for properties. | Yes      |
-| `property` | undefined  | string \| string[]  | One or more properties to watch.   | Yes      |
-| `frames`   | 20         | number              | Number of frames to wait.          | No       |
-| `timeout`  | 30 \* 1000 | number              | Timeout in milliseconds.           | No       |
+| Property   | Default    | Type                | Description                        | Required           |
+| ---------- | ---------- | ------------------- | ---------------------------------- | ------------------ |
+| `subject`  | undefined  | () => Chainable\<T> | Chainable to watch for properties. | :white_check_mark: |
+| `property` | undefined  | string \| string[]  | One or more properties to watch.   | :white_check_mark: |
+| `frames`   | 20         | number              | Number of frames to wait.          | :x:                |
+| `timeout`  | 30 \* 1000 | number              | Timeout in milliseconds.           | :x:                |
 
 ### Returns
 
-The command returns a Cypress promise which resolves to an array of objects (one for each property) or throws an error if `timeout` is reached:
+[Cypress Promise](https://docs.cypress.io/api/utilities/promise) which resolves to an array of objects (one for each property) or throws an error if `timeout` is reached:
 
 | Property   | Type                                                                | Description                                     |
 | ---------- | ------------------------------------------------------------------- | ----------------------------------------------- |
-| `subject`  | `AUTWindow` \| `Document` \| `HTMLElement` \| `JQuery<HTMLElement>` | Subject yielded from `subject` option.          |
+| `subject`  | `AUTWindow` \| `Document` \| `HTMLElement` \| `JQuery<HTMLElement>` | Subject yielded from `subject` Chainer.         |
 | `value`    | `string \| number`                                                  | Property value at which the function resolved.  |
 | `property` | `string`                                                            | Awaited property name.                          |
 | `time`     | `DOMHighResTimestamp`                                               | Time in ms that took to resolve since invoking. |
@@ -168,7 +171,7 @@ Check the [tests](https://github.com/smastrom/cypress-wait-frames/tree/main/test
 
 ## Contributing
 
-Contributions are very welcome. If you think that the code can be improved without touching the current API, feel free to open a PR.
+Contributions are very welcome. If you think this package can be improved without touching the current API, feel free to open a PR.
 
 PNPM is used as a package manager. Use any code style you prefer, git hooks are already set up to format the code.
 
