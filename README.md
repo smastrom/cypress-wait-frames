@@ -24,6 +24,10 @@ If using TypeScript, install the latest version of [csstype](https://www.npmjs.c
 pnpm add -D csstype
 ```
 
+### Examples
+
+Check the [tests](https://github.com/smastrom/cypress-wait-frames/tree/main/tests) folder.
+
 <br />
 
 ## Usage
