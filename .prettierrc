@@ -2,11 +2,13 @@
 	"trailingComma": "es5",
 	"singleQuote": true,
 	"printWidth": 100,
+	"tabWidth": 4,
 	"useTabs": true,
 	"overrides": [
 		{
 			"files": "README.md",
 			"options": {
+				"tabWidth": 2,
 				"trailingComma": "none",
 				"useTabs": false,
 				"semi": false

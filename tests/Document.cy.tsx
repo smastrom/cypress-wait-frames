@@ -55,6 +55,7 @@ it('Should throw error if unknown prop', (end) => {
 
 	cy.waitFrames({
 		subject: () => cy.document(),
+		// @ts-expect-error - CiaoCiao is not a valid property
 		property: ['background-color', 'CiaoCiao'],
 		frames: 30,
 	});

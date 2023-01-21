@@ -53,7 +53,7 @@ it('Should throw error if invalid subject', (end) => {
 
 	cy.waitFrames({
 		subject: () => cy.get('h1'), // Needs its()
-		property: ['background-color'],
+		property: 'background-color',
 		frames: 30,
 	});
 });
