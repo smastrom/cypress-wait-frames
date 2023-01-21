@@ -39,10 +39,10 @@ it('Should match multiple properties on scroll to bottom complete', () => {
 		expect(data.length).to.equal(2);
 
 		cy.document().then((doc) => {
-			const scrollHeight =
+			const scrolledHeight =
 				doc.documentElement.scrollHeight - doc.documentElement.clientHeight;
-			expect(data[0].value).to.equal(scrollHeight);
-			expect(data[1].value).to.equal(scrollHeight);
+			expect(data[0].value).to.equal(scrolledHeight);
+			expect(data[1].value).to.equal(scrolledHeight);
 		});
 	});
 });

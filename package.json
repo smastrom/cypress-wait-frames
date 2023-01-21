@@ -5,6 +5,7 @@
 	"description": "Cypress command to correctly wait for any CSS/DOM properties to be idle after n frames.",
 	"keywords": [
 		"cypress",
+		"cypress-command",
 		"cypress-wait-frames",
 		"cypress-wait",
 		"cypress-raf",
