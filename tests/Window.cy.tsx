@@ -5,7 +5,7 @@ it('Single Property', () => {
 	cy.scrollTo('bottom');
 
 	cy.waitFrames({
-		subject: () => cy.window(),
+		subject: cy.window,
 		property: 'scrollY',
 		frames: 30,
 	}).then((data) => {
@@ -19,7 +19,7 @@ it('Single Property', () => {
 	cy.scrollTo('top');
 
 	cy.waitFrames({
-		subject: () => cy.window(),
+		subject: cy.window,
 		property: 'scrollY',
 		frames: 30,
 	}).then((data) => {
@@ -32,7 +32,7 @@ it('Multiple Properties', () => {
 	cy.scrollTo('bottom');
 
 	cy.waitFrames({
-		subject: () => cy.window(),
+		subject: cy.window,
 		property: ['scrollY', 'pageYOffset'],
 		frames: 30,
 	}).then((data) => {
@@ -54,7 +54,7 @@ it('Should throw error if unknown prop', (end) => {
 	cy.expectError(end, '[cypress-wait-frames] - Invalid window property: background-color');
 
 	cy.waitFrames({
-		subject: () => cy.window(),
+		subject: cy.window,
 		// @ts-expect-error - CSS properties not supported on window
 		property: 'background-color',
 	});

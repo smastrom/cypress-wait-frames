@@ -5,7 +5,7 @@ it('Single Property', () => {
 	cy.scrollTo('bottom');
 
 	cy.waitFrames({
-		subject: () => cy.document(),
+		subject: cy.document,
 		property: 'scrollTop',
 	}).then((data) => {
 		expect(data[0].value).to.equal(data[0].subject.documentElement.scrollTop);
@@ -14,7 +14,7 @@ it('Single Property', () => {
 	cy.scrollTo('top');
 
 	cy.waitFrames({
-		subject: () => cy.document(),
+		subject: cy.document,
 		property: 'scrollTop',
 	}).then((data) => {
 		expect(data[0].value).to.equal(0);
@@ -33,7 +33,7 @@ it('Multiple Properties', () => {
 	cy.scrollTo('bottom');
 
 	cy.waitFrames({
-		subject: () => cy.document(),
+		subject: cy.document,
 		property: ['color', 'background-color', 'scrollTop'],
 	}).then((data) => {
 		expect(data.length).to.equal(3);
@@ -51,7 +51,7 @@ it('Should throw error if unknown prop', (end) => {
 	cy.expectError(end, '[cypress-wait-frames] - Invalid DOM/CSS property: CiaoCiao');
 
 	cy.waitFrames({
-		subject: () => cy.document(),
+		subject: cy.document,
 		// @ts-expect-error - CiaoCiao is not a valid property
 		property: ['background-color', 'CiaoCiao'],
 		frames: 30,

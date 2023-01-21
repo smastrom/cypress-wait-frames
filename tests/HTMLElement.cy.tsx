@@ -18,7 +18,7 @@ it('Single Property', () => {
 });
 
 describe('Multiple properties', () => {
-	// Fixes HMR on line 30
+	// Fixes HMR on line 31
 	afterEach(() => {
 		cy.scrollTo('top');
 	});
