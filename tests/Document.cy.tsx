@@ -7,7 +7,6 @@ it('Single Property', () => {
 	cy.waitFrames({
 		subject: () => cy.document(),
 		property: 'scrollTop',
-		frames: 20,
 	}).then((data) => {
 		expect(data[0].value).to.equal(data[0].subject.documentElement.scrollTop);
 	});
@@ -17,7 +16,6 @@ it('Single Property', () => {
 	cy.waitFrames({
 		subject: () => cy.document(),
 		property: 'scrollTop',
-		frames: 20,
 	}).then((data) => {
 		expect(data[0].value).to.equal(0);
 	});
@@ -37,7 +35,6 @@ it('Multiple Properties', () => {
 	cy.waitFrames({
 		subject: () => cy.document(),
 		property: ['color', 'background-color', 'scrollTop'],
-		frames: 20,
 	}).then((data) => {
 		expect(data.length).to.equal(3);
 

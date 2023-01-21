@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import type * as CSS from 'csstype';
+import type { PropertiesHyphen } from 'csstype';
 
 declare global {
 	// eslint-disable-next-line @typescript-eslint/no-namespace
@@ -24,7 +24,7 @@ export type WaitCmdOpts<T> = {
 
 type Properties<T> = T extends Cypress.AUTWindow
 	? keyof T | `${keyof Cypress.AUTWindow}.${string}`
-	: keyof HTMLElement | keyof CSS.PropertiesHyphen | `${keyof HTMLElement}.${string}`;
+	: keyof HTMLElement | keyof PropertiesHyphen | `${keyof HTMLElement}.${string}`;
 
 export type WaitCmdReturn<T> = {
 	/** Subject yielded from `subject` option. */
@@ -43,8 +43,6 @@ export type WaitCmdReturn<T> = {
 	value: string | number | undefined;
 	/** Timestamp at which the function resolved. */
 	timestamp: DOMHighResTimeStamp;
-	/** Attempt number at which the function resolved. */
-	attempts: number;
 };
 
 export type GetValueOptions<T> = {

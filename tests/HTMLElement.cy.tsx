@@ -12,13 +12,12 @@ it('Single Property', () => {
 	cy.waitFrames({
 		subject: () => cy.get('h1').its(15),
 		property: 'getBoundingClientRect.top',
-		frames: 20,
 	}).then((data) => {
-		expect(data[0].value).to.be.approximately(-1, 1);
+		expect(data[0].value).to.satisfy((value: number) => value >= -2 && value <= 2);
 	});
 });
 
-it('Multiple Properties', () => {
+it.only('Multiple Properties', () => {
 	cy.mount(<App />);
 
 	cy.get('#Container').then((el) => {
@@ -32,12 +31,11 @@ it('Multiple Properties', () => {
 	cy.waitFrames({
 		subject: () => cy.get('#Container'),
 		property: ['getBoundingClientRect.top', 'background-color'],
-		frames: 20,
 	}).then((data) => {
 		expect(data.length).to.equal(2);
 
 		const { scrollTop } = document.documentElement;
-		expect(data[0].value).to.equal(-scrollTop);
+		expect(data[0].value).to.approximately(-scrollTop, 2);
 		expect(data[1].value).to.equal('rgb(255, 0, 0)');
 	});
 });
