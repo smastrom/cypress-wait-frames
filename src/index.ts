@@ -7,7 +7,7 @@ const ERR = '[cypress-wait-frames] - ';
 export function waitFrames<T>({
 	subject: getSubject,
 	property,
-	frames = 10,
+	frames = 20,
 	timeout = 30 * 1000,
 }: WaitCmdOpts<T>) {
 	getSubject().then((subject) => {
@@ -102,28 +102,28 @@ function getValue<T>({ isWin, cyWin, target, prop }: GetValueOptions<T>) {
 function _waitFrames<T>({ isWin, isDoc, cyWin, target, prop, frames }: RafOptions<T>) {
 	return new Cypress.Promise<WaitCmdReturn<T>>((resolve, reject) => {
 		let rafId: DOMHighResTimeStamp = 0;
-		let prevValue: number | string | undefined | null = null;
-		let frameCount = 0;
-		let attempts = 0;
+		let prevValue: number | string | undefined | null = getValue<T>({
+			isWin,
+			cyWin,
+			target,
+			prop,
+		});
+
+		let framesCount = 0;
 
 		function getNextValue() {
 			try {
+				framesCount++;
+
 				const nextValue = getValue<T>({ isWin, cyWin, target, prop });
 
-				if (prevValue === null || prevValue !== nextValue) {
-					if (frameCount > 0) {
-						attempts++;
-					}
-
-					frameCount = 0;
+				if (prevValue !== nextValue) {
+					framesCount = 0;
 					prevValue = nextValue;
-
 					return cyWin.requestAnimationFrame(getNextValue);
 				}
 
-				frameCount++;
-
-				if (frameCount === frames) {
+				if (framesCount === frames) {
 					cyWin.cancelAnimationFrame(rafId as DOMHighResTimeStamp);
 					resolve({
 						subject: (isWin
@@ -134,7 +134,6 @@ function _waitFrames<T>({ isWin, isDoc, cyWin, target, prop, frames }: RafOption
 						property: prop,
 						value: nextValue,
 						timestamp: performance.now(),
-						attempts,
 					});
 				} else {
 					cyWin.requestAnimationFrame(getNextValue);

@@ -55,8 +55,7 @@ it('Should throw error if unknown prop', (end) => {
 
 	cy.waitFrames({
 		subject: () => cy.window(),
-		// @ts-expect-error - CSS properties not supported when window
+		// @ts-expect-error - CSS properties not supported on window
 		property: 'background-color',
-		frames: 30,
 	});
 });
