@@ -40,10 +40,12 @@ export type WaitCmdReturn<T> = {
 	/** Awaited property name. */
 	property: Properties<T>;
 	/** Value at which the function resolved. */
-	value: string | number | undefined;
+	value: Primitive;
 	/** Time in ms that took to resolve since invoking. */
 	time: DOMHighResTimeStamp;
 };
+
+export type Primitive = string | number | undefined | null;
 
 export type GetValueOptions<T> = {
 	isWin: boolean;
