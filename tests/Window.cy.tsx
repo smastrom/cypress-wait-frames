@@ -10,7 +10,8 @@ it('Single Property', () => {
 		frames: 30,
 	}).then((data) => {
 		cy.document().then((doc) => {
-			const scrollHeight = doc.documentElement.scrollHeight - doc.documentElement.clientHeight;
+			const scrollHeight =
+				doc.documentElement.scrollHeight - doc.documentElement.clientHeight;
 			expect(data[0].value).to.equal(scrollHeight);
 		});
 	});
@@ -38,7 +39,8 @@ it('Multiple Properties', () => {
 		expect(data.length).to.equal(2);
 
 		cy.document().then((doc) => {
-			const scrollHeight = doc.documentElement.scrollHeight - doc.documentElement.clientHeight;
+			const scrollHeight =
+				doc.documentElement.scrollHeight - doc.documentElement.clientHeight;
 			expect(data[0].value).to.equal(scrollHeight);
 			expect(data[1].value).to.equal(scrollHeight);
 		});
@@ -53,6 +55,7 @@ it('Should throw error if unknown prop', (end) => {
 
 	cy.waitFrames({
 		subject: () => cy.window(),
+		// @ts-expect-error - CSS properties not supported when window
 		property: 'background-color',
 		frames: 30,
 	});

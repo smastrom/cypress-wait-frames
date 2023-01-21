@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 import type { WaitCmdOpts, WaitCmdReturn, GetValueOptions, RafOptions } from './types';
 
 const ERR = '[cypress-wait-frames] - ';
@@ -21,7 +23,7 @@ export function waitFrames<T>({
 
 			if (!isWin && !isDoc && !isEl && !isWrappedEl) {
 				throw new Error(
-					`${ERR} Invalid subject. It must be 'cy.window', 'cy.document' or '() => cy.get()'.`
+					`${ERR} Invalid subject. It must be either 'cy.window', 'cy.document' or '() => cy.get()'.`
 				);
 			}
 

@@ -48,7 +48,7 @@ it('Should throw error if invalid subject', (end) => {
 
 	cy.expectError(
 		end,
-		"[cypress-wait-frames] - Invalid subject. It must be 'cy.window', 'cy.document' or '() => cy.get()'."
+		"[cypress-wait-frames] - Invalid subject. It must be either 'cy.window', 'cy.document' or '() => cy.get()'."
 	);
 
 	cy.waitFrames({

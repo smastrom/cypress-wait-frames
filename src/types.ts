@@ -1,27 +1,33 @@
-import { PropertiesHyphen } from 'csstype';
+/// <reference types="cypress" />
+
+import type * as CSS from 'csstype';
 
 declare global {
 	// eslint-disable-next-line @typescript-eslint/no-namespace
 	namespace Cypress {
 		interface Chainable {
-			waitFrames<T>(options: WaitCmdOpts<T>): Cypress.Chainable<WaitCmdReturn<T>[]>;
+			waitFrames<T>(options: WaitCmdOpts<T>): Chainable<WaitCmdReturn<T>[]>;
 		}
 	}
 }
 
-type Properties<T> = T extends Cypress.AUTWindow
-	? keyof T | `${keyof Cypress.AUTWindow}.${string}`
-	: keyof HTMLElement | keyof PropertiesHyphen | `${keyof HTMLElement}.${string}`;
-
 export type WaitCmdOpts<T> = {
+	/** Cypress Chainable.  */
 	subject: () => Cypress.Chainable<T>;
+	/** DOM/CSS properties to watch for. */
 	property: Properties<T> | Properties<T>[];
+	/** Number of frames at which function should resolve. */
 	frames?: number;
+	/** Timeout in ms at which the function should throw an error. */
 	timeout?: number;
-	failOnTimeout?: boolean;
 };
 
+type Properties<T> = T extends Cypress.AUTWindow
+	? keyof T | `${keyof Cypress.AUTWindow}.${string}`
+	: keyof HTMLElement | keyof CSS.PropertiesHyphen | `${keyof HTMLElement}.${string}`;
+
 export type WaitCmdReturn<T> = {
+	/** Subject yielded from `subject` option. */
 	subject: T extends Cypress.AUTWindow
 		? T
 		: T extends Document
@@ -31,9 +37,13 @@ export type WaitCmdReturn<T> = {
 		: T extends JQuery<HTMLElement>
 		? T
 		: never;
+	/** Awaited property name. */
 	property: Properties<T>;
+	/** Value at which the function resolved. */
 	value: string | number | undefined;
+	/** Timestamp at which the function resolved. */
 	timestamp: DOMHighResTimeStamp;
+	/** Attempt number at which the function resolved. */
 	attempts: number;
 };
 
