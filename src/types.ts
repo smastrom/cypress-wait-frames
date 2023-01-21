@@ -42,7 +42,7 @@ export type WaitCmdReturn<T> = {
 	/** Value at which the function resolved. */
 	value: string | number | undefined;
 	/** Timestamp at which the function resolved. */
-	timestamp: DOMHighResTimeStamp;
+	time: DOMHighResTimeStamp;
 };
 
 export type GetValueOptions<T> = {
