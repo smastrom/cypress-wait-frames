@@ -1,6 +1,6 @@
 import { App } from './App';
 
-it('Single Property', () => {
+it('Should match getBoundingClientRect top property', () => {
 	cy.mount(<App />);
 
 	cy.get('h1')
@@ -17,7 +17,7 @@ it('Single Property', () => {
 	});
 });
 
-describe('Multiple properties', () => {
+describe('Should match multiple properties on color transition and scroll to bottom complete', () => {
 	// Fixes HMR on line 31
 	afterEach(() => {
 		cy.scrollTo('top');

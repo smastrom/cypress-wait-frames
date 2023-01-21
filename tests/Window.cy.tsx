@@ -1,6 +1,6 @@
 import { App } from './App';
 
-it('Single Property', () => {
+it('Should match scrollY on scroll to bottom and to top complete', () => {
 	cy.mount(<App />);
 	cy.scrollTo('bottom');
 
@@ -27,7 +27,7 @@ it('Single Property', () => {
 	});
 });
 
-it('Multiple Properties', () => {
+it('Should match multiple properties on scroll to bottom complete', () => {
 	cy.mount(<App />);
 	cy.scrollTo('bottom');
 
