@@ -7,7 +7,7 @@ const ERR = '[cypress-wait-frames] - ';
 export function waitFrames<T>({
 	subject: getSubject,
 	property,
-	frames = 5,
+	frames = 10,
 	timeout = 30 * 1000,
 }: WaitCmdOpts<T>) {
 	getSubject().then((subject) => {
