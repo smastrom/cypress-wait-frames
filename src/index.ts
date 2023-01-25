@@ -92,6 +92,10 @@ function getValue<T>({ isWin, cyWin, target, prop }: GetValueOptions<T>): Primit
 		throw new Error(`${ERR} Invalid window property: ${prop as string}`);
 	}
 
+	if ((prop as string).startsWith('--')) {
+		return cyWin.getComputedStyle(target as HTMLElement).getPropertyValue(prop as string);
+	}
+
 	if (!(prop in cyWin.getComputedStyle(target as HTMLElement))) {
 		throw new Error(`${ERR} Invalid DOM/CSS property: ${prop as string}`);
 	}
