@@ -4,6 +4,8 @@ import type { WaitCmdOpts, WaitCmdReturn, GetValueOptions, RafOptions, Primitive
 
 const ERR = '[cypress-wait-frames] - ';
 
+const unique = Symbol('');
+
 function waitFrames<T>({
 	subject: getSubject,
 	property,
@@ -73,15 +75,32 @@ function isPrimitive(value: unknown) {
 
 function getValue<T>({ isWin, cyWin, target, prop }: GetValueOptions<T>): Primitive {
 	if ((prop as string).includes('.')) {
-		const [method, _prop] = (prop as string).split('.');
-		const rectValue = (
-			(target as HTMLElement)[method as keyof HTMLElement] as CallableFunction
-		)?.()?.[_prop];
+		let objValue: symbol | Primitive = unique;
 
-		if (rectValue === undefined || rectValue === null) {
-			throw new Error(`${ERR} Invalid or unsupported method: ${prop as string}`);
+		const [objOrMethod, _prop] = (prop as string).split('.');
+
+		if (typeof target[objOrMethod as keyof typeof target] === 'function') {
+			objValue = (
+				(target as HTMLElement)[objOrMethod as keyof HTMLElement] as CallableFunction
+			)?.()?.[_prop];
 		}
-		return rectValue;
+
+		if (typeof target[objOrMethod as keyof typeof target] === 'object') {
+			objValue = (
+				(target as HTMLElement)[objOrMethod as keyof HTMLElement] as Record<
+					string,
+					Primitive
+				>
+			)?.[_prop];
+		}
+
+		if (objValue !== unique && isPrimitive(objValue)) {
+			return objValue as Primitive;
+		}
+
+		throw new Error(
+			`${ERR} Invalid or unsupported ${isWin ? 'window' : ''} property: ${prop as string}`
+		);
 	}
 
 	if (prop in target && isPrimitive(target[prop as keyof typeof target])) {
@@ -92,15 +111,19 @@ function getValue<T>({ isWin, cyWin, target, prop }: GetValueOptions<T>): Primit
 		throw new Error(`${ERR} Invalid window property: ${prop as string}`);
 	}
 
-	if ((prop as string).startsWith('--')) {
+	function getCSS() {
 		return cyWin.getComputedStyle(target as HTMLElement).getPropertyValue(prop as string);
 	}
 
-	if (!(prop in cyWin.getComputedStyle(target as HTMLElement))) {
-		throw new Error(`${ERR} Invalid DOM/CSS property: ${prop as string}`);
+	if ((prop as string).startsWith('--')) {
+		return getCSS();
 	}
 
-	return cyWin.getComputedStyle(target as HTMLElement).getPropertyValue(prop as string);
+	if (!(prop in cyWin.getComputedStyle(target as HTMLElement))) {
+		throw new Error(`${ERR} Invalid element DOM/CSS property: ${prop as string}`);
+	}
+
+	return getCSS();
 }
 
 function _waitFrames<T>({ isWin, isDoc, cyWin, target, prop, frames }: RafOptions<T>) {

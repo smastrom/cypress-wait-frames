@@ -1,6 +1,6 @@
 {
 	"name": "cypress-wait-frames",
-	"version": "0.9.2",
+	"version": "0.9.4",
 	"private": false,
 	"description": "Cypress command to correctly wait for any CSS/DOM properties to be idle after n frames.",
 	"keywords": [
