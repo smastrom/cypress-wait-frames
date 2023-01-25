@@ -22,9 +22,11 @@ export type WaitCmdOpts<T> = {
 	timeout?: number;
 };
 
+type ElementProps = keyof HTMLElement | keyof SVGElement | keyof SVGGraphicsElement;
+
 type Properties<T> = T extends Cypress.AUTWindow
 	? keyof T | `${keyof Cypress.AUTWindow}.${string}`
-	: keyof HTMLElement | keyof PropertiesHyphen | `${keyof HTMLElement}.${string}`;
+	: ElementProps | keyof PropertiesHyphen | `${ElementProps}.${string}` | `--${string}`;
 
 export type WaitCmdReturn<T> = {
 	/** Subject yielded from `subject` option. */
