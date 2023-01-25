@@ -11,6 +11,17 @@ it('Should get single property on Window', () => {
 	});
 });
 
+it('Should get object property on Window', () => {
+	cy.mount(<App />);
+
+	cy.waitFrames({
+		subject: cy.window,
+		property: 'visualViewport.height',
+	}).then(([{ value }]) => {
+		cy.wrap(value).should('exist');
+	});
+});
+
 it('Should get single property on DocumentElement', () => {
 	cy.mount(<App />);
 
@@ -46,7 +57,7 @@ it('Should get single property on SVGGraphicsElement', () => {
 	});
 });
 
-it.only('Should get multiple properties on Window', () => {
+it('Should get multiple properties on Window', () => {
 	cy.mount(<App />);
 
 	cy.waitFrames({
@@ -82,7 +93,7 @@ it('Should get multiple properties on DocumentElement/HTMLElement', () => {
 			expect(color).to.equal('rgb(0, 128, 0)');
 			expect(backgroundColor).to.equal('rgb(255, 0, 0)');
 			expect(scrollTop).to.exist;
-			expect(CSSVar).to.equal('red');
+			expect((CSSVar as string).trim()).to.equal('red');
 		}
 	);
 });
@@ -119,7 +130,7 @@ it('Should throw error if invalid prop', (end) => {
 	cy.mount(<App />);
 	cy.scrollTo('bottom');
 
-	cy.expectError(end, '[cypress-wait-frames] - Invalid DOM/CSS property: XXX');
+	cy.expectError(end, '[cypress-wait-frames] - Invalid element DOM/CSS property: XXX');
 
 	cy.waitFrames({
 		subject: cy.document,

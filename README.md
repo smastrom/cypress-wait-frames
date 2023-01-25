@@ -41,7 +41,7 @@ cy.scrollTo(0, 1200)
 cy.window().eq('scrollY').should('be.approximately', 1200, 2) // Will retry until it passes
 ```
 
-Documentation on [retry-ability](https://docs.cypress.io/guides/core-concepts/retry-ability) is very detailed and it might already contain the answer to your problem.
+Documentation on [retry-ability](https://docs.cypress.io/guides/core-concepts/retry-ability) is very detailed and it might already contain the answer you're looking for.
 
 <br />
 
@@ -49,7 +49,7 @@ Documentation on [retry-ability](https://docs.cypress.io/guides/core-concepts/re
 
 There are cases where it's impossible to retain retry-ability and you might find yourself guessing timings using `cy.wait`.
 
-For example when asserting on properties not available on queries like `its` or `invoke`:
+For example when asserting properties not available within Cypress queries:
 
 ```js
 cy.get('h1').eq(15).scrollIntoView()
@@ -59,12 +59,11 @@ cy.get('h1').eq(15).scrollIntoView()
 cy.get('h1')
   .eq(15)
   .then((el) => {
-    // Retry-ability is lost with .then()
     cy.wrap(el[0].getBoundingClientRect().top).should('be.approximately', 0, 2)
   })
 ```
 
-Or when assertions rely on values that must be 100% accurate:
+Or when futher assertions must rely on 100% accurate values:
 
 ```js
 cy.get('#TriggerComplexTransition').click()
@@ -87,7 +86,7 @@ But scenarios can be disparate and more complex. Bottom line is that if you find
 
 ## Usage
 
-Instead of guessing timings using `cy.wait` which will make your tests flaky, you can use `cy.waitFrames` to wait for a one or more properties to be idle after a specified number of frames.
+Instead of guessing timings using `cy.wait` you can use `cy.waitFrames` to wait for a one or more properties to be idle after a specified number of frames.
 
 Specify a `subject` to watch, one or more `property` and a number of `frames`. Command will resolve once queried properties haven't changed for that number of frames.
 
@@ -130,14 +129,16 @@ cy.log('Resized!') // This is executed once outerWidth isn't changed for 20 fram
 | `frames`   | 20         | number              | Number of frames to wait.          | :x:                |
 | `timeout`  | 30 \* 1000 | number              | Timeout in milliseconds.           | :x:                |
 
-### Returns
+<br />
+
+## Yields
 
 A [Cypress Promise](https://docs.cypress.io/api/utilities/promise) which resolves to an array of objects (one for each property) or throws an error if `timeout` is reached:
 
 | Property   | Type                                                                | Description                                     |
 | ---------- | ------------------------------------------------------------------- | ----------------------------------------------- |
 | `subject`  | `AUTWindow` \| `Document` \| `HTMLElement` \| `JQuery<HTMLElement>` | Subject yielded from `subject` option chainer.  |
-| `value`    | `string \| number`                                                  | Property value at which the function resolved.  |
+| `value`    | `string \| number` \| `null` \| `undefined`                         | Property value at which the function resolved.  |
 | `property` | `string`                                                            | Awaited property name.                          |
 | `time`     | `DOMHighResTimestamp`                                               | Time in ms that took to resolve since invoking. |
 
@@ -155,7 +156,7 @@ cy.waitFrames({
 
 :bulb: Use `cy.window` to watch for _window-only_ DOM properties like `scrollY` or `outerWidth`.
 
-### Document / HTML
+### DocumentElement / HTML
 
 ```js
 cy.waitFrames({
@@ -165,7 +166,7 @@ cy.waitFrames({
 
 :bulb: Use `cy.document` to watch for DOM/CSS properties on the `documentElement` such as `clientWidth`, `pointer-events`, `overflow` etc.
 
-### Element
+### HTMLElement / SVGElement
 
 ```js
 cy.waitFrames({
@@ -181,43 +182,49 @@ cy.waitFrames({
 
 ## Properties
 
-It can either be a DOM property (scrollTop, clientHeight, etc.) or a CSS property (background-color, --MyVariable, etc.).
+### DOM properties
 
 ```js
 cy.waitFrames({
   subject: cy.window,
-  property: 'scrollY', // DOM prop
+  property: 'scrollY',
   frames: 10
+})
+```
+
+### CSS properties
+
+```js
+cy.waitFrames({
+  subject: () => cy.get('.my-element'),
+  property: 'background-color', // or '--my-var'
+  frames: 10
+})
+```
+
+:bulb: Use _kebab-case_ for CSS properties. `getComputedStyle` is used internally to get the values.
+
+### Objects / methods properties
+
+```js
+cy.waitFrames({
+  subject: cy.window,
+  property: 'visualViewport.offsetTop'
 })
 ```
 
 ```js
 cy.waitFrames({
   subject: () => cy.get('.my-element'),
-  property: 'background-color', // CSS prop
-  frames: 10
+  property: 'getBoundingClientRect.top'
 })
 ```
 
-:bulb: Use _kebab-case_ for CSS properties. `getComputedStyle` is used internally to get the values so feel free to query any CSS property even if not direcly added via classes or styles.
+:warning: Bear in mind that only methods or objects with **maximum 1 property** which returns a primitive are supported.
 
-:bulb: If using TypeScript, it will warn you if you type a wrong property name (e.g. _scrollY_ on an HTMLElement, _background-color_ on Window or _flexWrap_ instead of _flex-wrap_).
+Methods with arity greater than 0 are not supported, _e.g. `getAttribute('href')`_.
 
-### Methods
-
-To watch for properties on methods such as `getBoundingClientRect`, pass the method name followed by `.` plus the property name:
-
-```js
-cy.waitFrames({
-  subject: () => cy.get('.my-element'),
-  property: 'getBoundingClientRect.top',
-  frames: 10
-})
-```
-
-:warning: Bear in mind that this kind of usage is intended for those methods which return primitives such as `getBBox` on a `circle` element. You can't call methods with arity greater than 0 or with more than 1 nested property that doesn't return a primitive.
-
-### Multiple properties
+### Multiple properties / methods
 
 You can watch for multiple properties as well:
 
