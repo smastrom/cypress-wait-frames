@@ -21,15 +21,23 @@ function waitFrames<T>({
 
          if (!isWin) {
             const isJquery = Cypress.dom.isJquery(subject)
-            if (!isJquery) {throw new Error(targetErr)}
+            if (!isJquery) {
+               throw new Error(targetErr)
+            }
 
             target = (subject as JQuery<HTMLElement | SVGElement>)['0']
          }
 
-         if (!target) {throw new Error(targetErr)}
-         if (!Array.isArray(property) && typeof property !== 'string') {throw new Error(propsErr)}
+         if (!target) {
+            throw new Error(targetErr)
+         }
+         if (!Array.isArray(property) && typeof property !== 'string') {
+            throw new Error(propsErr)
+         }
 
-         if (typeof property === 'string') {property = [property]}
+         if (typeof property === 'string') {
+            property = [property]
+         }
 
          return await Cypress.Promise.all(
             property.map((prop) =>
@@ -54,40 +62,36 @@ function getValue<T>({ isWin, cyWin, target, prop }: GetValueOptions<T>): Primit
 
    const emptyValue = Symbol('')
 
+   type Key = keyof typeof target
+
    if (typeof prop === 'string' && prop.includes('.')) {
-      let objValue: symbol | Primitive = emptyValue
+      let objValue: Primitive | symbol = emptyValue
 
       const [objOrMethod, _prop] = prop.split('.')
 
-      if (typeof target[objOrMethod as keyof typeof target] === 'function') {
-         objValue = (
-            (target as HTMLElement)[objOrMethod as keyof HTMLElement] as CallableFunction
-         )?.()?.[_prop]
+      if (typeof target[objOrMethod as Key] === 'function') {
+         objValue = (target[objOrMethod as Key] as CallableFunction)()?.[_prop]
       }
 
-      if (typeof target[objOrMethod as keyof typeof target] === 'object') {
-         objValue = (
-            (target as HTMLElement)[objOrMethod as keyof HTMLElement] as Record<string, Primitive>
-         )?.[_prop]
+      if (typeof target[objOrMethod as Key] === 'object') {
+         objValue = (target[objOrMethod as Key] as Record<string, any>)?.[_prop]
       }
 
-      if (objValue !== emptyValue) {return objValue as Primitive}
+      if (objValue !== emptyValue && isPrimitive(objValue)) {return objValue as Primitive}
 
       throw new Error(
-         `${ERR} Invalid or unsupported ${isWin ? 'window' : ''} property: ${prop as string}`
+         `${ERR} Invalid or unsupported ${isWin ? 'window' : ''} property: ${prop as Key}`
       )
    }
 
-   if (prop in target && isPrimitive(target[prop as keyof typeof target])) {
-      return target[prop as keyof typeof target] as Primitive
-   }
+   if (prop in target && isPrimitive(target[prop as Key])) {return target[prop as Key] as Primitive}
 
-   if (isWin) {throw new Error(`${ERR} Invalid window property: ${prop as string}`)}
+   if (isWin) {throw new Error(`${ERR} Invalid window property: ${prop as Key}`)}
 
    if (typeof prop === 'string' && prop.startsWith('--')) {return getCSS()}
 
    if (!(prop in cyWin.getComputedStyle(target as HTMLElement))) {
-      throw new Error(`${ERR} Invalid element DOM/CSS property: ${prop as string}`)
+      throw new Error(`${ERR} Invalid element DOM/CSS property: ${prop as Key}`)
    }
 
    return getCSS()
