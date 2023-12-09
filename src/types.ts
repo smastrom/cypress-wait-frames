@@ -3,7 +3,6 @@
 import type { PropertiesHyphen } from 'csstype'
 
 declare global {
-   // eslint-disable-next-line @typescript-eslint/no-namespace
    namespace Cypress {
       interface Chainable {
          waitFrames<T extends Cypress.AUTWindow | JQuery<HTMLElement | SVGElement>>(

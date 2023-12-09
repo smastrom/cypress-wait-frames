@@ -1,13 +1,12 @@
-import './commands';
-import { mount } from 'cypress/react18';
+import './commands'
+import { mount } from 'cypress/react18'
 
 declare global {
-	// eslint-disable-next-line @typescript-eslint/no-namespace
-	namespace Cypress {
-		interface Chainable {
-			mount: typeof mount;
-		}
-	}
+   namespace Cypress {
+      interface Chainable {
+         mount: typeof mount
+      }
+   }
 }
 
-Cypress.Commands.add('mount', mount);
+Cypress.Commands.add('mount', mount)

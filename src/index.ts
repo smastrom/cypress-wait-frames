@@ -2,6 +2,8 @@
 
 import type { WaitCmdOpts, WaitCmdReturn, GetValueOptions, RafOptions, Primitive } from './types'
 
+export * from './types'
+
 const ERR = '[cypress-wait-frames] - '
 
 const targetErr = `${ERR} Invalid subject. It must be either 'cy.window' or '() => cy.get('*')'.`
@@ -21,23 +23,15 @@ function waitFrames<T>({
 
          if (!isWin) {
             const isJquery = Cypress.dom.isJquery(subject)
-            if (!isJquery) {
-               throw new Error(targetErr)
-            }
+            if (!isJquery) throw new Error(targetErr)
 
             target = (subject as JQuery<HTMLElement | SVGElement>)['0']
          }
 
-         if (!target) {
-            throw new Error(targetErr)
-         }
-         if (!Array.isArray(property) && typeof property !== 'string') {
-            throw new Error(propsErr)
-         }
+         if (!target) throw new Error(targetErr)
+         if (!Array.isArray(property) && typeof property !== 'string') throw new Error(propsErr)
 
-         if (typeof property === 'string') {
-            property = [property]
-         }
+         if (typeof property === 'string') property = [property]
 
          return await Cypress.Promise.all(
             property.map((prop) =>
@@ -54,7 +48,8 @@ function waitFrames<T>({
    })
 }
 
-const isPrimitive = (value: unknown) => value === null || typeof value !== 'object'
+const isPrimitive = (value: unknown) =>
+   value === null || (typeof value !== 'object' && typeof value !== 'function')
 
 function getValue<T>({ isWin, cyWin, target, prop }: GetValueOptions<T>): Primitive {
    const getCSS = () =>
@@ -77,18 +72,24 @@ function getValue<T>({ isWin, cyWin, target, prop }: GetValueOptions<T>): Primit
          objValue = (target[objOrMethod as Key] as Record<string, any>)?.[_prop]
       }
 
-      if (objValue !== emptyValue && isPrimitive(objValue)) {return objValue as Primitive}
+      if (objValue !== emptyValue && isPrimitive(objValue)) return objValue as Primitive
 
       throw new Error(
          `${ERR} Invalid or unsupported ${isWin ? 'window' : ''} property: ${prop as Key}`
       )
    }
 
-   if (prop in target && isPrimitive(target[prop as Key])) {return target[prop as Key] as Primitive}
+   if (prop in target && isPrimitive(target[prop as Key])) {
+      return target[prop as Key] as Primitive
+   }
 
-   if (isWin) {throw new Error(`${ERR} Invalid window property: ${prop as Key}`)}
+   if (isWin) {
+      throw new Error(`${ERR} Invalid window property: ${prop as Key}`)
+   }
 
-   if (typeof prop === 'string' && prop.startsWith('--')) {return getCSS()}
+   if (typeof prop === 'string' && prop.startsWith('--')) {
+      return getCSS()
+   }
 
    if (!(prop in cyWin.getComputedStyle(target as HTMLElement))) {
       throw new Error(`${ERR} Invalid element DOM/CSS property: ${prop as Key}`)

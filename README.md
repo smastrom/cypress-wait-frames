@@ -63,7 +63,7 @@ cy.get('h1')
   })
 ```
 
-But scenarios can be disparate and more complex. Bottom line is that if you find yourself using `cy.wait()` as last resort to obtain values or wait for DOM/CSS properties to be idle, this package might be for you.
+But scenarios can be disparate and more complex. Bottom line is that if you find yourself using `cy.wait()` as last resort to obtain values or to wait for DOM/CSS properties to be idle, this package might be useful.
 
 <br />
 
