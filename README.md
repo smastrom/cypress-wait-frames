@@ -21,7 +21,7 @@ import 'cypress-wait-frames'
 
 <br />
 
-If using TypeScript, install the latest version of [csstype](https://www.npmjs.com/package/csstype) for CSS properties autocompletion:
+If using TypeScript, optionally install the latest version of [csstype](https://www.npmjs.com/package/csstype) for CSS properties autocompletion:
 
 ```bash
 pnpm add -D csstype
@@ -45,9 +45,9 @@ Documentation on [retry-ability](https://docs.cypress.io/guides/core-concepts/re
 
 <br />
 
-## When to use it
+## When I find it useful
 
-There are cases where it's impossible to retain retry-ability and you might find yourself guessing timings using `cy.wait`.
+There are cases where it's very hard to retain retry-ability and you might find yourself guessing timings using `cy.wait` or increasing the retry-ability timeout.
 
 For example when asserting properties not available within Cypress queries:
 
@@ -63,71 +63,54 @@ cy.get('h1')
   })
 ```
 
-Or when futher assertions must rely on 100% accurate values:
-
-```js
-cy.get('#TriggerComplexTransition').click()
-
-// Need to add cy.wait(t) to make sure desktopHeight is accurate
-
-cy.viewport('macbook-15').get('#TransitionedElement').invoke('height').as('desktopHeight')
-
-cy.get('@desktopHeight').then((desktopHeight) => {
-  cy.viewport('ipad-2')
-    .get('#TransitionedElement')
-    .invoke('height')
-    .should('be.equal', desktopHeight / 2)
-})
-```
-
-But scenarios can be disparate and more complex. Bottom line is that if you find yourself using `cy.wait()` as last resort, this package might be for you.
+But scenarios can be disparate and more complex. Bottom line is that if you find yourself using `cy.wait()` as last resort to obtain values or wait for DOM/CSS properties to be idle, this package might be for you.
 
 <br />
 
 ## Usage
 
-Instead of guessing timings using `cy.wait` you can use `cy.waitFrames` to wait for a one or more properties to be idle after a specified number of frames.
-
-Specify a `subject` to watch, one or more `property` and a number of `frames`. Command will resolve once queried properties haven't changed for that number of frames.
+### Window
 
 ```js
-cy.get('h1').eq(15).scrollIntoView()
-
 cy.waitFrames({
-  subject: () => cy.get('h1').eq(15),
-  property: 'getBoundingClientRect.top',
-  frames: 20 // Wait for the property to be idle for 20 frames
+  subject: cy.window,
+  property: 'outerWidth'
+})
+
+cy.log('Resized!') // Executed once 'outerWidth' isn't changed for 20 frames (default).
+```
+
+### DocumentElement
+
+```js
+cy.waitFrames({
+  subject: () => cy.get('html'),
+  property: 'clientWidth',
+  frames: 10
+})
+
+cy.log('Resized!') // Executed once 'clientWidth' isn't changed for 10 frames.
+```
+
+### HTMLElement / SVGElement
+
+```js
+cy.waitFrames({
+  subject: () => cy.get('a').eq(0),
+  property: 'getBoundingClientRect.top'
 }).then(([{ value }]) => {
-  cy.wrap(value).should('be.approximately', 0, 2) // Passes in any environment
+  cy.wrap(value).should('be.approximately', 0, 2) // Asserts that top is 0 after 20 frames (default).
 })
-```
-
-You can also use it to just to wait for a property to be idle:
-
-```js
-Cypress.Commands.add('waitForResize', () => {
-  cy.waitFrames({
-    subject: cy.window,
-    property: 'outerWidth',
-    frames: 20
-  })
-})
-```
-
-```js
-cy.waitForResize()
-
-cy.log('Resized!') // This is executed once outerWidth isn't changed for 20 frames.
 ```
 
 ### Options
 
-| Property   | Default    | Type                | Description                        | Required           |
-| ---------- | ---------- | ------------------- | ---------------------------------- | ------------------ |
-| `subject`  | undefined  | () => Chainable\<T> | Chainable to watch for properties. | :white_check_mark: |
-| `property` | undefined  | string \| string[]  | One or more properties to watch.   | :white_check_mark: |
-| `frames`   | 20         | number              | Number of frames to wait.          | :x:                |
-| `timeout`  | 30 \* 1000 | number              | Timeout in milliseconds.           | :x:                |
+| Property   | Default    | Type                                                                              | Description                                             | Required           |
+| ---------- | ---------- | --------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------ |
+| `subject`  | undefined  | `() => Cypress.Chainable<Cypress.AutWindow \| JQuery<HTMLElement \| SVGElement>>` | Subject to watch.                                       | :white_check_mark: |
+| `property` | undefined  | `string \| string[]`                                                              | One or more properties to watch.                        | :white_check_mark: |
+| `frames`   | 20         | `number`                                                                          | Number of frames to wait.                               | :x:                |
+| `timeout`  | 30 \* 1000 | `number`                                                                          | Timeout in milliseconds before the command should fail. | :x:                |
 
 <br />
 
@@ -135,48 +118,12 @@ cy.log('Resized!') // This is executed once outerWidth isn't changed for 20 fram
 
 A [Cypress Promise](https://docs.cypress.io/api/utilities/promise) which resolves to an array of objects (one for each property) or throws an error if `timeout` is reached:
 
-| Property   | Type                                                                | Description                                     |
-| ---------- | ------------------------------------------------------------------- | ----------------------------------------------- |
-| `subject`  | `AUTWindow` \| `Document` \| `HTMLElement` \| `JQuery<HTMLElement>` | Subject yielded from `subject` option chainer.  |
-| `value`    | `string \| number` \| `null` \| `undefined`                         | Property value at which the function resolved.  |
-| `property` | `string`                                                            | Awaited property name.                          |
-| `time`     | `DOMHighResTimestamp`                                               | Time in ms that took to resolve since invoking. |
-
-<br />
-
-## Subjects
-
-### Window
-
-```js
-cy.waitFrames({
-  subject: cy.window
-})
-```
-
-:bulb: Use `cy.window` to watch for _window-only_ DOM properties like `scrollY` or `outerWidth`.
-
-### DocumentElement / HTML
-
-```js
-cy.waitFrames({
-  subject: cy.document
-})
-```
-
-:bulb: Use `cy.document` to watch for DOM/CSS properties on the `documentElement` such as `clientWidth`, `pointer-events`, `overflow` etc.
-
-### HTMLElement / SVGElement
-
-```js
-cy.waitFrames({
-  subject: () => cy.get('a').eq(0) // or () => cy.get('.my-selector')
-})
-```
-
-:bulb: Use `() => cy.get` to watch for DOM/CSS properties on any other HTMLElement.
-
-:warning: When using `cy.get`, make sure to pass a function which returns the chainable.
+| Property   | Type                         | Description                                     |
+| ---------- | ---------------------------- | ----------------------------------------------- |
+| `subject`  | `AUTWindow` \| `HTMLElement` | Subject yielded from `subject` option chainer.  |
+| `value`    | `Primitive`                  | Property value at which the function resolved.  |
+| `property` | `string`                     | Awaited property name.                          |
+| `time`     | `DOMHighResTimestamp`        | Time in ms that took to resolve since invoking. |
 
 <br />
 
@@ -186,9 +133,8 @@ cy.waitFrames({
 
 ```js
 cy.waitFrames({
-  subject: cy.window,
-  property: 'scrollY',
-  frames: 10
+  subject: () => cy.get('html'),
+  property: 'clientWidth'
 })
 ```
 
@@ -196,15 +142,16 @@ cy.waitFrames({
 
 ```js
 cy.waitFrames({
-  subject: () => cy.get('.my-element'),
-  property: 'background-color', // or '--my-var'
-  frames: 10
+  subject: () => cy.get('#my-element'),
+  property: 'background-color'
 })
 ```
 
-:bulb: Use _kebab-case_ for CSS properties. `getComputedStyle` is used internally to get the values.
+:bulb: Use _kebab-case_ for CSS properties. [getComputedStyle](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle) is used internally to get the values.
 
-### Objects / methods properties
+### Nested properties / methods
+
+You can watch for methods or objects **maximum 1 nested property** which returns a primitive.
 
 ```js
 cy.waitFrames({
@@ -215,28 +162,23 @@ cy.waitFrames({
 
 ```js
 cy.waitFrames({
-  subject: () => cy.get('.my-element'),
+  subject: () => cy.get('a').eq(0),
   property: 'getBoundingClientRect.top'
 })
 ```
 
-:warning: Bear in mind that only methods or objects with **maximum 1 property** which returns a primitive are supported.
+:warning: Methods with arity greater than 0 are not supported, (e.g. `getAttribute('href')`).
 
-Methods with arity greater than 0 are not supported, _e.g. `getAttribute('href')`_.
+### Mixed properties / methods
 
-### Multiple properties / methods
-
-You can watch for multiple properties as well:
+You can watch for multiple properties as well, `waitFrames` will resolve once all properties are idle:
 
 ```js
 cy.waitFrames({
-  subject: () => cy.get('.my-element'),
-  property: ['background-color', 'scrollTop', 'getBoundingClientRect.top'],
-  frames: 10
+  subject: () => cy.get('a').eq(0),
+  property: ['background-color', 'scrollTop', 'getBoundingClientRect.top']
 })
 ```
-
-:bulb: `waitFrames` will resolve once all properties are idle.
 
 <br />
 
