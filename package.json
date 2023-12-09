@@ -1,6 +1,6 @@
 {
    "name": "cypress-wait-frames",
-   "version": "0.9.4",
+   "version": "0.9.8",
    "private": false,
    "description": "Cypress command to correctly wait for any CSS/DOM properties to be idle after n frames.",
    "keywords": [
@@ -35,7 +35,7 @@
       "dist/*"
    ],
    "scripts": {
-      "build": "rm -rf dist && tsc && vite build",
+      "build": "tsc && vite build",
       "postbuild": "tsc src/types.ts --declaration --emitDeclarationOnly --outFile dist/index.d.ts",
       "dev": "cypress open --component",
       "prepare": "husky install",
